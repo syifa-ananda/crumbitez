@@ -105,7 +105,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "syifa-ananda31-crumbitez.pbp.cs.ui.a
 - Push to PWS repository for the deployment
 
 2. Create a diagram that contains the request client to a Django-based web application and the response it gives, and explain the relationship between urls.py, views.py, models.py, and the html file.
-![alt text](diagram.png)
+![alt text](diagram2.png)
 
 3. Explain the use of git in software development!
 Git is a tool in software development that helps manage code changes and enables collaboration among developers on project versions and features or fixes branches before integrating them into the main codebase repository effectively maintaining a record of alterations, for easy rollback when necessary. 
