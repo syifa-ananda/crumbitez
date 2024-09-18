@@ -1,3 +1,4 @@
+## Assignment 2
 
 **Questions and Answers**
 1. Explain how you implemented the checklist above step-by-step (not just following the tutorial).
@@ -118,3 +119,148 @@ Django is often chosen as a starting point for learning software development bec
 5. Why is the Django model called an ORM?
 
 Django models are called an ORM (Object-Relational Mapping) because they allow developers to work with databases using Python objects than directly writing SQL queries form scratch. The ORM automatically translates Python code (like creating, reading, updating, or deleting data) into SQL commands that are executed on the database. This abstraction simplifies database operations and ensures that developers work with database records as if they were Python objects, making development more intuitive.
+
+
+## Assignment 3
+
+**Question and Answers**
+1. Explain why we need data delivery in implementing a platform.
+
+Data delivery is essential for implementing a platform as it enables real-time access to information, facilitating prompt decision-making and seamless platform operations. It enables scalability as data volumes increase and facilitates smooth integration of different data sources, such as APIs or IoT devices, improving the overall user experience. Reliable data delivery reduces delays and ensuring consistent performance. This is crucial for platforms handling high traffic or needing real-time processing.
+
+2. In your opinion, which is better, XML or JSON? Why is JSON more popular than XML?
+
+In my opinion, JSON is better than XML for most modern applications due to its simplicity, lightweight structure, and native support in JavaScript, making it easier to use and more efficient for data transmission. JSON's popularity is driven by its readability, smaller file sizes, and quicker parsing in web development, whereas XML is more verbose and complex, making it less suitable for contemporary web-based systems.
+ 
+3. Explain the functional usage of is_valid() method in Django forms. Also explain why we need the method in forms.
+
+In Django forms, is_valid() method is used to validate the data submitted in a form according to the validations defined by the form. When the form is triggered, it prepares every field in the form to be validated against whatever criteria you have (like required fields, type of fields and custom validators). True means the data is valid in which case form.SetValue method validated returns true and gives us the form with validated data. cleaned_data. Otherwise it returns False and you can access the errors in form.errors. This method is important to ensure that only valid and clean data is processed or saved, which helps to maintain data integrity and prevent errors in application logic.
+
+4. Why do we need csrf_token when creating a form in Django? What could happen if we did not use csrf_token on a Django form? How could this be leveraged by an attacker?
+
+The csrf_token in Django forms is used to protect against Cross-Site Request Forgery (CSRF) attacks, in which a malicious request is submitted without the user's awareness due to trickery by an attacker. This token guarantees that the form was submitted from the same site and not externally. If the csrf_token is not used, a fake form that submitted requests on behalf of the user might be placed on some other site which could enable unauthorized actions such as changing account details, transferring funds or deleting data. Without the CSRF protection, these types of attacks could compromise the security and integrity of the web application.
+ 
+5. Explain how you implemented the checklist above step-by-step (not just following the tutorial).
+
+**Create a form input to add a model object to the previous app**
+
+- Create a new file in the main directory with the name ```forms.py``` to create the structure of the form and fill it with
+```
+from django.forms import ModelForm
+from main.models import Product
+
+class CrumbitezEntryForm(ModelForm):
+    class Meta:
+        model = Product
+        fields = ["name", "price", "description", "quantity"]
+```
+- Open the ```views.py``` file in the main directory. Add ```from django.shortcuts import render, redirect``` and create the function with the name ```create_product```
+```
+def create_product(request):
+    form = CrumbitezEntryForm(request.POST or None)
+
+    if form.is_valid() and request.method == "POST":
+        form.save()
+        return redirect('main:show_main')
+
+    context = {'form': form}
+    return render(request, "create_product.html", context)
+```
+- Change the ```show_main``` function that already exists in the ```views.py``` file to the following
+```
+def show_main(request):
+    crumbitez_entries = Product.objects.all()
+
+    context = {
+        'app_name': 'crumbitez',
+        'name': 'Syifa Ananda Widyati',
+        'class': 'PBD KKI',
+        'product_entries': 'crumbitez_entries',
+    }
+
+    return render(request, 'main.html', context)
+```
+- Open the ```urls.py``` file and import the ```create_product``` function and add the URL path to the ```urlpatterns``` varaible
+```
+from main.views import show_main, create_product
+```
+```
+urlpatterns = [
+   ...
+   path('create-product', create_product, name='create_product'),
+]
+```
+- Create new HTML file named  ```create_product.html``` in the ```main/templates``` and add the following code
+```
+{% extends 'base.html' %} 
+{% block content %}
+<h1>Add New Product</h1>
+
+<form method="POST">
+  {% csrf_token %}
+  <table>
+    {{ form.as_table }}
+    <tr>
+      <td></td>
+      <td>
+        <input type="submit" value="Add Product" />
+      </td>
+    </tr>
+  </table>
+</form>
+
+{% endblock %}
+```
+
+**Add 4 views to view the added objects in XML, JSON, XML by ID, and JSON by ID formats**
+
+- Open the ```views.py``` file and add the ```HttpResponse``` and ```Serializer``` imports at the top of the file
+```
+from django.http import HttpResponse
+from django.core import serializers
+```
+- Create four new function in the ```views.py```
+```
+def show_xml(request):
+    data = Product.objects.all()
+    return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
+
+def show_json(request):
+    data = Product.objects.all()
+    return HttpResponse(serializers.serialize("json", data), content_type="application/json")
+
+def show_xml_by_id(request, id):
+    data = Product.objects.filter(pk=id)
+    return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
+
+def show_json_by_id(request, id):
+    data = Product.objects.filter(pk=id)
+    return HttpResponse(serializers.serialize("json", data), content_type="application/json")
+```
+
+**Create URL routing for each of the views**
+
+- Open the ```urls.py``` file and import the function that we just created
+```from main.views import show_main, create_product, show_xml, show_json, show_xml_by_id, show_json_by_id
+```
+- Add the URL path to the ```urlpatterns``` variable in the ```urls.py``` file to access the function that was imported in the previous point
+```
+...
+path('xml/', show_xml, name='show_xml'),
+path('json/', show_json, name='show_json'),
+path('xml/<str:id>/', show_xml_by_id, name='show_xml_by_id'),
+path('json/<str:id>/', show_json_by_id, name='show_json_by_id'),
+```
+**Postman Result**
+
+- XML
+![alt text](xml.png)
+
+- XML by ID
+![alt text](xmlId.png)
+
+- JSON
+![alt text](json.png)
+
+- JSON by ID
+![alt text](jsonId.png)
