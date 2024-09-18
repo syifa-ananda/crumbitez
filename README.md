@@ -140,7 +140,7 @@ In Django forms, is_valid() method is used to validate the data submitted in a f
 
 The csrf_token in Django forms is used to protect against Cross-Site Request Forgery (CSRF) attacks, in which a malicious request is submitted without the user's awareness due to trickery by an attacker. This token guarantees that the form was submitted from the same site and not externally. If the csrf_token is not used, a fake form that submitted requests on behalf of the user might be placed on some other site which could enable unauthorized actions such as changing account details, transferring funds or deleting data. Without the CSRF protection, these types of attacks could compromise the security and integrity of the web application.
  
-5. Explain how you implemented the checklist above step-by-step (not just following the tutorial).
+5. Explain how you implemented the checklist above step-by-step
 
 **Create a form input to add a model object to the previous app**
 
@@ -241,8 +241,7 @@ def show_json_by_id(request, id):
 **Create URL routing for each of the views**
 
 - Open the ```urls.py``` file and import the function that we just created
-```from main.views import show_main, create_product, show_xml, show_json, show_xml_by_id, show_json_by_id
-```
+```from main.views import show_main, create_product, show_xml, show_json, show_xml_by_id, show_json_by_id```
 - Add the URL path to the ```urlpatterns``` variable in the ```urls.py``` file to access the function that was imported in the previous point
 ```
 ...
@@ -251,6 +250,7 @@ path('json/', show_json, name='show_json'),
 path('xml/<str:id>/', show_xml_by_id, name='show_xml_by_id'),
 path('json/<str:id>/', show_json_by_id, name='show_json_by_id'),
 ```
+
 **Postman Result**
 
 - XML
