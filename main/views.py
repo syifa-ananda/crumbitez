@@ -14,14 +14,14 @@ from django.contrib.auth import logout
 
 @login_required(login_url='/login')
 def show_main(request):
-    crumbitez_entries = Product.objects.all()
+    crumbitez_entries = Product.objects.filter(user=request.user)
 
     context = {
         'name': request.user.username,
+        'npm' : '2306173656',
         'app_name': 'crumbitez',
-        'name': 'Syifa Ananda Widyati',
         'class': 'PBD KKI',
-        'product_entries': 'crumbitez_entries',
+        'product_entries': crumbitez_entries,
         'last_login': request.COOKIES['last_login'],
     }
 
