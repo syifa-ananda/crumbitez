@@ -266,3 +266,221 @@ path('json/<str:id>/', show_json_by_id, name='show_json_by_id'),
 
 - JSON by ID
 ![alt text](jsonId.png)
+
+
+## Assignment 4
+
+**Steps**
+
+**Implement the register, login, and logout functions**
+- Open views.py, add imports and register function
+```
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
+```
+```
+def register(request):
+    form = UserCreationForm()
+
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your account has been successfully created!')
+            return redirect('main:login')
+    context = {'form':form}
+    return render(request, 'register.html', context)
+```
+
+- Create a new HTML file named ```register.html``` in the ```main/templates``` directory and add this code
+```
+{% extends 'base.html' %} {% block meta %}
+<title>Register</title>
+{% endblock meta %} {% block content %}
+
+<div class="login">
+  <h1>Register</h1>
+
+  <form method="POST">
+    {% csrf_token %}
+    <table>
+      {{ form.as_table }}
+      <tr>
+        <td></td>
+        <td><input type="submit" name="submit" value="Register" /></td>
+      </tr>
+    </table>
+  </form>
+
+  {% if messages %}
+  <ul>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
+
+{% endblock content %}
+```
+
+- Open ```urls.py```, import the register function and add a URL path to ```urlpatterns``` to access the imported function
+```
+from main.views import register
+```
+```
+ urlpatterns = [
+     ...
+     path('register/', register, name='register'),
+ ]
+ ```
+
+- Reopen ```views.py```, add the imports, login_user function, and logout_user function
+
+```
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import authenticate, login
+from django.contrib.auth import logout
+```
+```
+def login_user(request):
+   if request.method == 'POST':
+      form = AuthenticationForm(data=request.POST)
+
+      if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('main:show_main')
+
+   else:
+      form = AuthenticationForm(request)
+   context = {'form': form}
+   return render(request, 'login.html', context)
+```
+```
+def logout_user(request):
+    logout(request)
+    return redirect('main:login')
+```
+
+- Create a new HTML files named ```login.html``` and add this code
+```
+{% extends 'base.html' %}
+
+{% block meta %}
+<title>Login</title>
+{% endblock meta %}
+
+{% block content %}
+<div class="login">
+  <h1>Login</h1>
+
+  <form method="POST" action="">
+    {% csrf_token %}
+    <table>
+      {{ form.as_table }}
+      <tr>
+        <td></td>
+        <td><input class="btn login_btn" type="submit" value="Login" /></td>
+      </tr>
+    </table>
+  </form>
+
+  {% if messages %}
+  <ul>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %} Don't have an account yet?
+  <a href="{% url 'main:register' %}">Register Now</a>
+</div>
+
+{% endblock content %}
+```
+
+- Open ```main.html``` file in the ```main/templates``` directory and add the following code snippet after the hyperlink tag for "Add New Product"
+```
+...
+<a href="{% url 'main:logout' %}">
+  <button>Logout</button>
+</a>
+...
+```
+
+- Open ```urls.py```, import the functions and add the URL path to ```urlpatterns```
+```
+from main.views import login_user
+from main.views import logout_user
+```
+```
+urlpatterns = [
+   ...
+   path('login/', login_user, name='login'),
+   path('logout/', logout_user, name='logout'),
+]
+```
+
+** Connects models Product and User
+- Open models.py and add the following code below the line that imports the model
+```
+from django.contrib.auth.models import User
+```
+- Add this code inside the class ```Product```
+```
+user = models.ForeignKey(User, on_delete=models.CASCADE)
+```
+- Open ```views.py``` and modify the code in the ```create_product``` function
+```
+def create_product(request):
+    form = CrumbitezEntryForm(request.POST or None)
+
+    if form.is_valid() and request.method == "POST":
+        crumbitez_entry = form.save(commit=False)
+        crumbitez_entry.user = request.user
+        crumbitez_entry.save()
+        return redirect('main:show_main')
+
+    context = {'form': form}
+    return render(request, "create_product.html", context)
+```
+
+**Display logged in user details such as username and apply cookies like last login to the application's main page**
+- In the ```show_main``` function, add the following snippet to the context variable 
+```
+'last_login': request.COOKIES['last_login']
+```
+
+- Open the ```main.html``` file and add the following snippet after the logout button to display the last login data.
+```
+...
+<h5>Last login session: {{ last_login }}</h5>
+...
+```
+
+- - Change the value of ```crumbirez_entries``` and context in the function ```show_main``` as follows
+```
+def show_main(request):
+    crumbitez_entries = Product.objects.filter(user=request.user)
+
+    context = {
+        'name': request.user.username,
+...
+```
+
+**Qusetions and Answers**
+1. What is the difference between HttpResponseRedirect() and redirect()?
+`HttpResponseRedirect()` is a lower-level function that requires a full URL to redirect the user. In contrast, `redirect()` is a higher-level Django shortcut that can take a URL, view name, or model instance and internally uses `HttpResponseRedirect`, making it more flexible and easier to use.
+
+2. Explain how the MoodEntry model is linked with User!
+The `MoodEntry` model in Django is connected to the `User` model through a foreign key relationship, enabling each mood entry to be linked to a particular user. This is done using `models.ForeignKey(User, on_delete=models.CASCADE)`. Each `MoodEntry` is linked to a single `User`, and when the user is removed, their related mood entries are also removed. This relationship helps in tracking the creator of each mood entry and ensures that the data is organized by user accounts.
+
+3. What is the difference between authentication and authorization, and what happens when a user logs in? Explain how Django implements these two concepts.
+Authentication validates a user's identity. It is involves confirming a user's identity through methods such as a username and password. On the other hand, authorization specifies the resources or actions that an authenticated user is permitted to access. 
+
+Django initially authenticates a user by verifying the provided credentials against the database, typically using the `authenticate()` and `login()` functions, once the user logs in. If the credentials are valid, Django sets a session, linking the user to a session ID stored in cookies, allowing them to stay logged in across requests. 
+
+Django handles authentication with the User model and its authentication system (authenticate(), login(), logout()), while authorization is controlled through permissions and groups. Permissions can be assigned to users or groups. Views can be restricted based on these permissions using Django's built-in decorators, such as `@login_required` and `@permission_required`.
+
+4. How does Django remember logged-in users? Explain other uses of cookies and whether all cookies are safe to use.
+Django remembers logged-in users by using sessions. It stores a session ID in the user's browser as a cookie. When a user logs in, Django assigns a session ID and stores it in a cookie on the client side. The session data, such as the user's identity, is securely stored on the server. Whenever a user sends a request, their browser automatically sends the session cookie. This enables Django to recognize the user without requiring them to authenticate again. Besides sessions, cookies are utilized for additional functionalities such as tracking user preferences, managing shopping carts, and analytics. Not all cookies are safe, especially if they store sensitive data or are vulnerable to cross-site scripting (XSS) attacks. To guarantee safety, cookies should be carefully managed with flags such as `Secure` (to restrict transmission to HTTPS only) and `HttpOnly` (to block access through JavaScript).
