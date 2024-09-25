@@ -291,7 +291,6 @@ def register(request):
     context = {'form':form}
     return render(request, 'register.html', context)
 ```
-
 - Create a new HTML file named ```register.html``` in the ```main/templates``` directory and add this code
 ```
 {% extends 'base.html' %} {% block meta %}
@@ -323,7 +322,6 @@ def register(request):
 
 {% endblock content %}
 ```
-
 - Open ```urls.py```, import the register function and add a URL path to ```urlpatterns``` to access the imported function
 ```
 from main.views import register
@@ -334,9 +332,7 @@ from main.views import register
      path('register/', register, name='register'),
  ]
  ```
-
 - Reopen ```views.py```, add the imports, login_user function, and logout_user function
-
 ```
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate, login
@@ -362,7 +358,6 @@ def logout_user(request):
     logout(request)
     return redirect('main:login')
 ```
-
 - Create a new HTML files named ```login.html``` and add this code
 ```
 {% extends 'base.html' %}
@@ -398,7 +393,6 @@ def logout_user(request):
 
 {% endblock content %}
 ```
-
 - Open ```main.html``` file in the ```main/templates``` directory and add the following code snippet after the hyperlink tag for "Add New Product"
 ```
 ...
@@ -407,7 +401,6 @@ def logout_user(request):
 </a>
 ...
 ```
-
 - Open ```urls.py```, import the functions and add the URL path to ```urlpatterns```
 ```
 from main.views import login_user
@@ -450,14 +443,12 @@ def create_product(request):
 ```
 'last_login': request.COOKIES['last_login']
 ```
-
 - Open the ```main.html``` file and add the following snippet after the logout button to display the last login data.
 ```
 ...
 <h5>Last login session: {{ last_login }}</h5>
 ...
 ```
-
 - - Change the value of ```crumbirez_entries``` and context in the function ```show_main``` as follows
 ```
 def show_main(request):
@@ -470,12 +461,15 @@ def show_main(request):
 
 **Qusetions and Answers**
 1. What is the difference between HttpResponseRedirect() and redirect()?
+
 `HttpResponseRedirect()` is a lower-level function that requires a full URL to redirect the user. In contrast, `redirect()` is a higher-level Django shortcut that can take a URL, view name, or model instance and internally uses `HttpResponseRedirect`, making it more flexible and easier to use.
 
 2. Explain how the MoodEntry model is linked with User!
+
 The `MoodEntry` model in Django is connected to the `User` model through a foreign key relationship, enabling each mood entry to be linked to a particular user. This is done using `models.ForeignKey(User, on_delete=models.CASCADE)`. Each `MoodEntry` is linked to a single `User`, and when the user is removed, their related mood entries are also removed. This relationship helps in tracking the creator of each mood entry and ensures that the data is organized by user accounts.
 
 3. What is the difference between authentication and authorization, and what happens when a user logs in? Explain how Django implements these two concepts.
+
 Authentication validates a user's identity. It is involves confirming a user's identity through methods such as a username and password. On the other hand, authorization specifies the resources or actions that an authenticated user is permitted to access. 
 
 Django initially authenticates a user by verifying the provided credentials against the database, typically using the `authenticate()` and `login()` functions, once the user logs in. If the credentials are valid, Django sets a session, linking the user to a session ID stored in cookies, allowing them to stay logged in across requests. 
@@ -483,4 +477,5 @@ Django initially authenticates a user by verifying the provided credentials agai
 Django handles authentication with the User model and its authentication system (authenticate(), login(), logout()), while authorization is controlled through permissions and groups. Permissions can be assigned to users or groups. Views can be restricted based on these permissions using Django's built-in decorators, such as `@login_required` and `@permission_required`.
 
 4. How does Django remember logged-in users? Explain other uses of cookies and whether all cookies are safe to use.
+
 Django remembers logged-in users by using sessions. It stores a session ID in the user's browser as a cookie. When a user logs in, Django assigns a session ID and stores it in a cookie on the client side. The session data, such as the user's identity, is securely stored on the server. Whenever a user sends a request, their browser automatically sends the session cookie. This enables Django to recognize the user without requiring them to authenticate again. Besides sessions, cookies are utilized for additional functionalities such as tracking user preferences, managing shopping carts, and analytics. Not all cookies are safe, especially if they store sensitive data or are vulnerable to cross-site scripting (XSS) attacks. To guarantee safety, cookies should be carefully managed with flags such as `Secure` (to restrict transmission to HTTPS only) and `HttpOnly` (to block access through JavaScript).
