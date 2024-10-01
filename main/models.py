@@ -9,4 +9,3 @@ class Product(models.Model):
     price = models.IntegerField()
     description = models.TextField()
     quantity = models.IntegerField()
-

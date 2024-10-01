@@ -1,18 +1,61 @@
-{% extends 'base.html' %} 
-{% block content %}
-<h1>Add New Product</h1>
+{% extends 'base.html' %}
+{% load static %}
+{% block meta %}
+<title>Create Product</title>
+{% endblock meta %}
 
-<form method="POST">
-  {% csrf_token %}
-  <table>
-    {{ form.as_table }}
-    <tr>
-      <td></td>
-      <td>
-        <input type="submit" value="Add Product" />
-      </td>
-    </tr>
-  </table>
-</form>
+{% block content %}
+{% include 'navbar.html' %}
+
+<div class="flex flex-col min-h-screen bg-[#f5f5dc]"> <!-- Light beige background for the entire page -->
+  <div class="container mx-auto px-4 py-8 mt-16 max-w-xl">
+    <h1 class="text-3xl font-bold text-center mb-8 text-[#8b4513]">Create Product Entry</h1> <!-- Dark brown title -->
+  
+    <!-- White background for the form container with rounded corners and a border -->
+    <div class="bg-white shadow-md rounded-lg p-6 form-style">
+      <form method="POST" class="space-y-6">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="flex flex-col">
+            <label for="{{ field.id_for_label }}" class="mb-2 font-semibold text-[#5c4033]"> <!-- Medium brown for labels -->
+              {{ field.label }}
+            </label>
+            <div class="w-full">
+              <!-- Add visible borders to input fields only -->
+              {{ field|safe }} <!-- This ensures that the field is rendered correctly -->
+              <style>
+                /* Style input fields, textareas, and select elements */
+                input, select, textarea {
+                  border: 2px solid #8b4513; /* Dark brown border */
+                  background-color: white; /* Keep input background white */
+                  padding: 8px; /* Add some padding for the fields */
+                  border-radius: 4px; /* Slightly rounded corners */
+                  width: 100%; /* Full width for fields */
+                  box-sizing: border-box; /* Include padding in width calculation */
+                }
+                input:focus, select:focus, textarea:focus {
+                  outline: none; /* Remove default outline */
+                  border-color: #8b4513; /* Keep dark brown border on focus */
+                  box-shadow: 0 0 4px #8b4513; /* Add subtle shadow on focus */
+                }
+              </style>
+            </div>
+            {% if field.help_text %}
+              <p class="mt-1 text-sm text-[#8b572a]">{{ field.help_text }}</p> <!-- Light brown for help text -->
+            {% endif %}
+            {% for error in field.errors %}
+              <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endfor %}
+        <div class="flex justify-center mt-6">
+          <button type="submit" class="bg-[#8b4513] text-white font-semibold px-6 py-3 rounded-lg hover:bg-[#5c4033] transition duration-300 ease-in-out w-full"> <!-- Dark brown button -->
+            Create Product Entry
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 {% endblock %}
