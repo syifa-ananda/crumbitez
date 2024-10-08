@@ -1,14 +1,18 @@
 {% extends 'base.html' %}
 
+{% load static %} <!-- Load static files if needed -->
+
 {% block meta %}
 <title>Register</title>
 {% endblock meta %}
 
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-[#f5f5dc] py-12 px-4 sm:px-6 lg:px-8"> <!-- Light beige background -->
-  <div class="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
-    <div>
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-black">
+<div class="min-h-screen flex items-center justify-center w-screen py-12 px-4 sm:px-6 lg:px-8" style="background-color: #3b2e2b;"> <!-- Dark brown background -->
+  <div class="max-w-md w-full space-y-8 p-8 rounded-lg shadow-md" style="background-color: #f0ebe3;"> <!-- Off-white/broken white background -->
+    <div class="text-center">
+      <h2 class="mt-6 text-center text-3xl font-extrabold" style="color: #2e1f18; font-family: 'Anton', sans-serif;">
         Create your account
       </h2>
     </div>
@@ -18,21 +22,21 @@
       <div class="rounded-md shadow-sm -space-y-px">
         {% for field in form %}
           <div class="{% if not forloop.first %}mt-4{% endif %}">
-            <label for="{{ field.id_for_label }}" class="mb-2 font-semibold text-black">
+            <label for="{{ field.id_for_label }}" class="mb-2 font-semibold" style="color: #2e1f18;">
               {{ field.label }}
             </label>
             <div class="relative">
-              <!-- Update each field to include border styles -->
               {{ field|safe }}
               <style>
-                /* Add styles to input, select, and textarea elements */
+                /* Update input, select, and textarea styles */
                 input, select, textarea {
                   border: 2px solid #8B4513; /* Dark brown border */
                   padding: 10px; /* Padding inside input fields */
-                  border-radius: 6px; /* Slightly rounded corners */
-                  background-color: white; /* Keep the input fields' background color white */
+                  border-radius: 30px; /* Increase border-radius for rounded shape */
+                  background-color: white; /* Keep input background color white */
                   width: 100%; /* Make input fields take full width */
-                  box-sizing: border-box; /* Ensure padding is included in width calculation */
+                  box-sizing: border-box; /* Include padding in width calculation */
+                  font-size: 16px; /* Font size for consistency */
                 }
                 input:focus, select:focus, textarea:focus {
                   border-color: #8B4513; /* Dark brown border on focus */
@@ -58,7 +62,7 @@
       </div>
 
       <div>
-        <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#8B4513] hover:bg-[#5c4033] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"> <!-- Dark brown button -->
+        <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white" style="background-color: #8B4513; border-radius: 30px;">
           Register
         </button>
       </div>
@@ -75,9 +79,9 @@
     {% endif %}
 
     <div class="text-center mt-4">
-      <p class="text-sm text-black">
+      <p class="text-sm" style="color: #2e1f18;">
         Already have an account?
-        <a href="{% url 'main:login' %}" class="font-medium text-yellow-600 hover:text-yellow-800">
+        <a href="{% url 'main:login' %}" class="font-medium" style="color: #e07338;">
           Login here
         </a>
       </p>

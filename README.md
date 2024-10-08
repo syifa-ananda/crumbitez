@@ -1176,3 +1176,6 @@ Margin, border, and padding are like layers of space around an element, each wit
 4. Explain the concepts of flex box and grid layout along with their uses!
 
 Flexbox and Grid are two tools in CSS that help we organize and arrange content on a web page. Flexbox is like a one-directional system, making it easy to line things up either in a row or a column. It’s great for simple layouts, like centering a button, creating a horizontal navigation bar, or making items automatically adjust their size to fill up space evenly. On the other hand, Grid is a two directional system, meaning we can control both rows and columns at the same time. This makes it perfect for more complex layouts, like creating a photo gallery or a magazine-style layout with multiple sections. With Grid, we can define specific areas for each item and make everything fit neatly. Both Flexbox and Grid help make our designs responsive and easier to control, and they often work best when used together to build beautiful, flexible web pages.
+
+
+## Assignment 5
