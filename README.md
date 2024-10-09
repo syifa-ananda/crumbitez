@@ -1178,4 +1178,314 @@ Margin, border, and padding are like layers of space around an element, each wit
 Flexbox and Grid are two tools in CSS that help we organize and arrange content on a web page. Flexbox is like a one-directional system, making it easy to line things up either in a row or a column. It’s great for simple layouts, like centering a button, creating a horizontal navigation bar, or making items automatically adjust their size to fill up space evenly. On the other hand, Grid is a two directional system, meaning we can control both rows and columns at the same time. This makes it perfect for more complex layouts, like creating a photo gallery or a magazine-style layout with multiple sections. With Grid, we can define specific areas for each item and make everything fit neatly. Both Flexbox and Grid help make our designs responsive and easier to control, and they often work best when used together to build beautiful, flexible web pages.
 
 
-## Assignment 5
+## Assignment 6
+
+
+**Steps**
+
+
+**Adding Error Message to Login**
+- Open ```vies.py``` and add this code to the ```login_user```
+```
+if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            response = HttpResponseRedirect(reverse("main:show_main"))
+            response.set_cookie('last_login', str(datetime.datetime.now()))
+            return response
+        else:
+            messages.error(request, "Invalid username or password. Please try again.")
+
+```
+
+**Creating Function to Add Product with AJAX**
+- Add this imports and create a new function in the ```views.py```
+```
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+```
+```
+@csrf_exempt
+@require_POST
+def add_product_entry_ajax(request):
+    product_name = strip_tags(request.POST.get("name"))
+    description = strip_tags(request.POST.get("description"))
+    price = request.POST.get("price")
+    quantity = request.POST.get("quantity")
+    user = request.user
+
+    new_product = Product(
+        name=product_name,
+        description=description,
+        price=price,
+        quantity=quantity,
+        user=user
+    )
+    new_product.save()
+
+    return HttpResponse(b"CREATED", status=201)
+```
+
+**Add Routing**
+- Import the function and add URL path inside of ```urlpatterns``` in the ```urls.py```
+```
+from main.views import ..., add_product_entry_ajax
+```
+```
+urlpatterns = [
+    ...
+    path('create-product-entry-ajax', add_product_entry_ajax, name='add_product_entry_ajax'),
+]
+```
+**Displaying Product Entry Data with ```fetch()``` API**
+- Open the views.py file and remove the two lines below
+```
+product_entries = ProductEntry.objects.filter(user=request.user)
+```
+and
+```
+'product_entries': product_entries,
+```
+- Change the first line of the ```show_json``` and ```show_xml``` function as follows
+```
+data = Product.objects.filter(user=request.user)
+```
+- Open ```main.html``` and add a new functions named ```getProductEnteries``` and ```refereshProductEnteries``` in the ```<script>``` block
+
+```
+async function getProductEntries(){
+      return fetch("{% url 'main:show_json' %}").then((res) => res.json())
+  }
+```
+```
+async function refreshProductEntries() {
+      document.getElementById("product_entry_cards").innerHTML = ""; // Clear existing content
+      document.getElementById("product_entry_cards").className = ""; // Reset class
+      const productEntries = await getProductEntries(); // Fetch product entries
+      let htmlString = "";
+      let classNameString = "";
+
+      if (productEntries.length === 0) {
+          classNameString = "flex flex-col items-center justify-center min-h-[24rem] p-6";
+          htmlString = `
+              <div class="flex flex-col items-center justify-center min-h-[24rem] p-6">
+                  <img src="{% static 'image/no-products.png' %}" alt="No products" class="w-32 h-32 mb-4"/>
+                  <p class="text-center text-gray-600 mt-4">No products available yet.</p>
+              </div>
+          `;
+      } else {
+          classNameString = "columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6 w-full";
+              htmlString += `
+              <div class="relative break-inside-avoid">
+                  <div class="relative top-5 bg-[#dcd3c4] shadow-md rounded-lg mb-6 break-inside-avoid flex flex-col border-2 border-[#8b4513]"> <!-- Card background with dark brown border -->
+                      <div class="bg-[#8b4513] text-white p-4 rounded-t-lg border-b-2 border-[#8b4513]">
+                          <h3 class="font-bold text-xl mb-2">${item.fields.name}</h3>
+                          <p>Price: $${item.fields.price}</p>
+                          <p>Quantity: ${item.fields.quantity}</p>
+                      </div>
+                      <div class="p-4">
+                          <p class="text-gray-700 mb-2">Description: ${item.fields.description}</p>
+                      </div>
+                  </div>
+                  <div class="absolute top-0 -right-4 flex space-x-1">
+                      <a href="/edit-product/${item.pk}" class="bg-[#d2691e] hover:bg-[#a0522d] text-white rounded-full p-2 transition duration-300 shadow-md">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                          </svg>
+                      </a>
+                      <a href="/delete/${item.pk}" class="bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition duration-300 shadow-md">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9" viewBox="0 0 20 20" fill="currentColor">
+                              <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                          </svg>
+                      </a>
+                  </div>
+              </div>
+              `;
+          };
+      }
+
+      document.getElementById("product_entry_cards").className = classNameString; // Update class
+      document.getElementById("product_entry_cards").innerHTML = htmlString; // Update HTML content
+  }
+  refreshProductEnteries();
+```
+
+**Creating Modal as a form to Add a Product**
+- Add the following code in the ```main.html```
+```
+  <div id="crudModal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 w-full flex items-center justify-center bg-gray-800 bg-opacity-50 overflow-x-hidden overflow-y-auto transition-opacity duration-300 ease-out">
+    <div id="crudModalContent" class="relative bg-white rounded-lg shadow-lg w-5/6 sm:w-3/4 md:w-1/2 lg:w-1/3 mx-4 sm:mx-0 transform scale-95 opacity-0 transition-transform transition-opacity duration-300 ease-out">
+      <!-- Modal header -->
+      <div class="flex items-center justify-between p-4 border-b rounded-t" style="border-color: #d2691e;"> <!-- Light brown border -->
+        <h3 class="text-xl font-semibold text-[#3b2e2b]"> <!-- Very dark brown text -->
+          Add New Product Entry
+        </h3>
+        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" id="closeModalBtn">
+          <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+          </svg>
+          <span class="sr-only">Close modal</span>
+        </button>
+      </div>
+      
+      <!-- Modal body -->
+      <div class="px-6 py-4 space-y-6 form-style">
+        <form id="productEntryForm">
+          <div class="mb-4">
+            <label for="name" class="block text-sm font-medium text-[#3b2e2b]"> <!-- Very dark brown text -->
+              Product Name
+            </label>
+            <input type="text" id="name" name="name" class="mt-1 block w-full border border-gray-300 rounded-md p-2 hover:border-[#d2691e]" placeholder="Enter product name" required>
+          </div>
+          <div class="mb-4">
+            <label for="description" class="block text-sm font-medium text-[#3b2e2b]"> <!-- Very dark brown text -->
+              Description
+            </label>
+            <textarea id="description" name="description" rows="3" class="mt-1 block w-full h-52 resize-none border border-gray-300 rounded-md p-2 hover:border-[#d2691e]" placeholder="Describe the product" required></textarea>
+          </div>
+          <div class="mb-4">
+            <label for="price" class="block text-sm font-medium text-[#3b2e2b]"> <!-- Very dark brown text -->
+              Price
+            </label>
+            <input type="number" id="price" name="price" class="mt-1 block w-full border border-gray-300 rounded-md p-2 hover:border-[#d2691e]" placeholder="Enter product price" required>
+          </div>
+          <div class="mb-4">
+            <label for="quantity" class="block text-sm font-medium text-[#3b2e2b]"> <!-- Very dark brown text -->
+              Quantity
+            </label>
+            <input type="number" id="quantity" name="quantity" min="1" class="mt-1 block w-full border border-gray-300 rounded-md p-2 hover:border-[#d2691e]" placeholder="Enter product quantity" required>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Modal footer -->
+      <div class="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2 p-6 border-t border-gray-200 rounded-b justify-center md:justify-end">
+        <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg" id="cancelButton">Cancel</button>
+        <button type="submit" id="submitProductEntry" form="productEntryForm" class="bg-[#d2691e] hover:bg-[#a0522d] text-white font-bold py-2 px-4 rounded-lg">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+```
+```
+<script>
+...
+const modal = document.getElementById('crudModal');
+  const modalContent = document.getElementById('crudModalContent');
+
+  function showModal() {
+      modal.classList.remove('hidden'); 
+      setTimeout(() => {
+          modalContent.classList.remove('opacity-0', 'scale-95');
+          modalContent.classList.add('opacity-100', 'scale-100');
+      }, 50); 
+  }
+
+  function hideModal() {
+      modalContent.classList.remove('opacity-100', 'scale-100');
+      modalContent.classList.add('opacity-0', 'scale-95');
+
+      setTimeout(() => {
+          modal.classList.add('hidden');
+      }, 150); 
+  }
+
+  document.getElementById("cancelButton").addEventListener("click", hideModal);
+  document.getElementById("closeModalBtn").addEventListener("click", hideModal);
+...
+</script>
+```
+- Change the Add New Product Entry button to this
+```
+<a href="{% url 'main:create_product' %}" class="bg-[#8b4513] hover:bg-[#d2691e] text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
+      Add New Product
+    </a>
+    <button data-modal-target="crudModal" data-modal-toggle="crudModal" class="btn bg-[#d2691e] hover:bg-[#a0522d] text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105" onclick="showModal();">
+      Add New Product Entry by AJAX
+    </button>
+```
+**Adding Data Product with AJAX**
+- Create new function in the ```main.html```
+```
+unction addProductEntry() {
+    fetch("{% url 'main:add_product_entry_ajax' %}", {
+      method: "POST",
+      body: new FormData(document.querySelector('#productEntryForm')),
+    })
+    .then(response => 
+    { if (response.ok) {
+        refreshProductEntries();
+    } else {
+        alert("Invalid")
+    }
+})
+
+    document.getElementById("productEntryForm").reset(); 
+    document.querySelector("[data-modal-toggle='crudModal']").click();
+
+    return false;
+  }
+```
+- Add the ```onclick``` function to the "Add Product" button
+```
+document.getElementById("submitProductEntry").onclick = addProductEntry
+```
+
+**Adding ```strip_tags``` to Clean Up new data**
+- In the ```views.py``` and ```forms.py``` files add this code
+```
+from django.utils.html import strip_tags
+```
+- In the ```add_product_entry_ajax``` function, use ```strip_tags``` function
+```
+@csrf_exempt
+@require_POST
+def add_product_entry_ajax(request):
+    product_name = strip_tags(request.POST.get("name"))
+    description = strip_tags(request.POST.get("description"))
+```
+- In the ```forms.py```, add the following two methods
+```
+def clean_name(self):
+    name = self.cleaned_data["name"]
+    return strip_tags(name)
+
+def clean_description(self):
+    description = self.cleaned_data["description"]
+    return strip_tags(description)
+```
+
+**Sanitizing Data with DOMPurify**
+- Open ```main.html``` and add this following code
+```
+{% block meta %}
+...
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
+...
+{% endblock meta %}
+```
+- Add this code to ```refereshProductEntries``` function
+```
+productEntries.forEach((item) => {
+    const productName = DOMPurify.sanitize(item.fields.name); // Sanitize product name
+    const description = DOMPurify.sanitize(item.fields.description); // Sanitize description
+    const price = item.fields.price; 
+    const quantity = item.fields.quantity;
+```
+
+1. Explain the benefits of using JavaScript in developing web applications!
+
+JavaScript is essential for web development because it enables interactive, responsive websites. It makes sites feel alive by allowing things like animations, pop-up messages, and instant content updates, all without needing to reload the page. Also, it works right in our browser, so it iss fast and does not need to keep going back to the server for every little thing. With tons of libraries and frameworks available, JavaScript helps developers quickly add features and build anything from simple websites to complex web apps. It is a universal language that plays well with other web tools, making it the backbone of the modern web experience.
+
+2. Explain why we need to use await when we call fetch()! What would happen if we don't use await?
+
+We use await with fetch() to ensure our code waits for the data to be fully retrieved before continuing. Since fetch() works asynchronously, it does not immediately give us the actual data, instead, it returns a Promise that resolves once the data request is complete. By adding await, we pause and let fetch() finish before continuing, ensuring we have the real data to work with. Without await, our code wouldn’t wait for the data, so any actions depending on it might fail or get unexpected results since they would be trying to use data that’s not ready yet.
+
+3. Why do we need to use the csrf_exempt decorator on the view used for AJAX POST?
+
+We use the csrf_exempt decorator on views handling AJAX POST requests to skip CSRF (Cross-Site Request Forgery) protection that Django usually requires for security. However, AJAX requests sometimes don’t automatically include the CSRF token, especially if they're triggered from external sources. Applying csrf_exempt allows these AJAX requests to work without issues. It is essential to use it carefully and only when we’re confident the endpoint is secure, as it removes a layer of security meant to block potentially harmful requests from outside sources.
+
+4. On this week's tutorial, the user input sanitization is done in the back-end as well. Why can't the sanitization be done just in the front-end?
+
+Sanitizing user input on the front end alone is not enough because users can easily bypass those checks, like by turning off JavaScript or tweaking the front-end code. Also, data does not always come directly from users, it could flow in from APIs, third-party sources, or even malicious scripts. Without server-side validation in Django, we are open to serious security risks, like SQL injection and XSS attacks, where attackers sneak in harmful code. So, keeping Django’s back-end sanitization solid ensures that every piece of data entering the system is safe and reliable, no matter where it comes from.
+
